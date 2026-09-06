@@ -38,16 +38,17 @@ SUBSYSTEM_DEF(special_roles)
 		if(istype(entries[id], /datum/special_roles_wave))
 			data_entry["isInvasion"] = FALSE
 			data_entry["timeLeft"] = entries[id]:time_of_spawn - world.time
-			data_entry["playerChoice"] = entries[id]:player_choices[user.ckey]
+			var/datum/job/player_choice = entries[id]:player_choices[user.ckey]
+			data_entry["playerChoice"] = player_choice?.title
 			var/roles = entries[id]:roles
 			for(var/datum/job/role as anything in roles)
-				data_roles += list(list("title" = role.title, "description" = role.description, "value" = roles[role]))
+				data_roles += list(list("title" = role.title, "description" = role.tutorial, "value" = roles[role]))
 		else
 			data_entry["isInvasion"] = TRUE
 			data_entry["spawnsLeft"] = entries[id]:spawns_left
 			var/roles = entries[id]:get_ratio_available_roles()
 			for(var/datum/job/role as anything in roles)
-				data_roles += list(list("title" = role.title, "description" = role.description, "value" = roles[role]))
+				data_roles += list(list("title" = role.title, "description" = role.tutorial, "value" = roles[role]))
 		data_entry["roles"] = data_roles
 		data_entries += list(data_entry)
 	data["entries"] = data_entries
@@ -57,21 +58,31 @@ SUBSYSTEM_DEF(special_roles)
 	. = ..()
 	if(.)
 		return
-	if(action == "select_role")
-		var/wave_id = params["wave_id"]
-		var/role = params["role"]
-		if(!wave_id || !role)
+	if(action == "selectrole")
+		var/entry_id = params["entryId"]
+		var/role_title = params["role"]
+		if(!entry_id || !role_title)
 			return FALSE
-		
-	
+		if(entries[entry_id] == null)
+			return FALSE
+		if(istype(entries[entry_id], /datum/special_roles_wave))
+			var/datum/special_roles_wave/wave = entries[entry_id]
+			var/datum/job/already_selected = wave.player_choices[ui.user.ckey]
+			if(already_selected != null && already_selected.title == role_title)
+				wave.player_choices[ui.user.ckey] = null
+			else
+				for(var/datum/job/role as anything in wave.roles)
+					if(role.title == role_title)
+						wave.player_choices[ui.user.ckey] = role
+						break
 
 /datum/special_roles_wave
 	var/name = ""
 	var/description = ""
-	///List where job datum is key and number of positions is value
+	///List where job datum typepath is key and number of positions is value
 	var/list/roles
 	///Can be either typepath or string with name of landmark to spawn on. 
-	///If there is multiple landmarks - will spawn on random one.
+	///If there are multiple landmarks of that name/type - will spawn on random one.
 	var/landmark = /obj/effect/landmark/start/outsider
 
 	var/time_of_spawn
@@ -93,14 +104,14 @@ SUBSYSTEM_DEF(special_roles)
 /datum/special_roles_invasion
 	var/name = ""
 	var/description = ""
-	///List where job datum is key and value is ratio to other roles of this invasion (0 to ignore ratio).
+	///List where job datum typepath is key and value is ratio to other roles of this invasion (0 to ignore ratio).
 	///Example:
 	///You will have 2 roles: fighter with ratio 0 and mage with ratio of 3.
 	///In that case people will be able to join as fighter at any time,
 	///but joining mage requires people to join other roles 3 times before that.
 	var/list/roles
 	///Can be either typepath or string with name of landmark to spawn on. 
-	///If there is multiple landmarks - will spawn on random one.
+	///If there are multiple landmarks of that name/type - will spawn on random one.
 	var/landmark = /obj/effect/landmark/start/outsider
 	var/spawns_left = 1
 
@@ -116,6 +127,7 @@ SUBSYSTEM_DEF(special_roles)
 	for(var/role in roles)
 		if(roles[role] == 0) // does not have ratio requirments
 			return_list[role] = 1
+			continue
 		var/other_roles_spawns_count = 0
 		for(var/tracked_role in roles_tracker)
 			if(tracked_role == role)
@@ -128,7 +140,7 @@ SUBSYSTEM_DEF(special_roles)
 			return_list[role] = 0
 			continue
 		return_list[role] = other_roles_spawns_count / roles_tracker[role] >= roles[role] // checking ratio
-
+	return return_list
 
 /datum/special_roles_invasion/test
 	name = "test invasion"
