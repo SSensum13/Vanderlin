@@ -160,6 +160,7 @@
 
 // Subsystem fire priority, from lowest to highest priority
 // If the subsystem isn't listed here it's either DEFAULT or PROCESS (if it's a processing subsystem child)
+#define FIRE_PRIORITY_SPECIAL_ROLES 5
 #define FIRE_PRIORITY_IDLE_NPC 5
 #define FIRE_PRIORITY_SLOW_OBJECTS 5
 #define FIRE_PRIORITY_ENCHANTMENT 10

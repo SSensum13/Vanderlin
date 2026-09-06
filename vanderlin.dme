@@ -534,6 +534,7 @@
 #include "code\controllers\subsystem\soundloopers.dm"
 #include "code\controllers\subsystem\sounds.dm"
 #include "code\controllers\subsystem\spatial_grid.dm"
+#include "code\controllers\subsystem\special_roles.dm"
 #include "code\controllers\subsystem\statpanel.dm"
 #include "code\controllers\subsystem\storyteller.dm"
 #include "code\controllers\subsystem\strategy_master.dm"

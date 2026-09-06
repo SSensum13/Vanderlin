@@ -550,4 +550,19 @@ GLOBAL_LIST_INIT(oocpronouns_required, list(
 
 	usr << browse(policytext.Join(""),"window=policy")
 
+/client/verb/specialrolesmenu()
+	set name = "Special Roles Menu"
+	set category = "OOC"
+	set desc = "Opens Special Roles menu."
+	SSspecial_roles.ui_interact(mob)
+
+/client/verb/specialrolestest()
+	set name = "Spawn Test Waves"
+	set category = "OOC"
+	set desc = "Test"
+	var/new_wave = new /datum/special_roles_wave/test()
+	var/new_invasion = new /datum/special_roles_invasion/test()
+	SSspecial_roles.create_event(new_wave)
+	SSspecial_roles.create_event(new_invasion)
+
 #undef MAX_PRONOUNS
